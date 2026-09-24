@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RESCUE-NET 2099 | Autonomous Food Rescue Platform</title>
+    <meta name="description" content="Next-generation autonomous food rescue & emergency redistribution network connecting donors, NGOs, and volunteers.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Leaflet CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-cyberpunk">
+    <!-- Background Animated Grid Canvas -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="scanline-overlay"></div>
+
+    <!-- Live Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- SOS Emergency Alert Fullscreen Flash Banner -->
+    <div id="sos-alert-banner" class="sos-banner hidden">
+        <div class="sos-banner-content">
+            <div class="sos-pulse-ring"></div>
+            <i class="fa-solid fa-triangle-exclamation sos-icon"></i>
+            <div class="sos-text">
+                <h2>CRITICAL SOS EMERGENCY SURPLUS ALERT</h2>
+                <p id="sos-banner-msg">Massive Perishable Surplus Broadcasted! Priority Dispatch Initiated.</p>
+            </div>
+            <button id="sos-dismiss-btn" class="cyber-btn danger-sm"><i class="fa-solid fa-xmark"></i> ACKNOWLEDGE</button>
+        </div>
+    </div>
+
+    <!-- Top Navigation Bar -->
+    <header class="cyber-navbar">
+        <div class="nav-brand">
+            <div class="logo-hexagon">
+                <i class="fa-solid fa-bolt-lightning"></i>
+            </div>
+            <div class="brand-text">
+                <span class="brand-name">RESCUE<span class="highlight-cyan">-NET</span></span>
+                <span class="brand-sub">AI SURPLUS DISPATCH v4.9</span>
+            </div>
+        </div>
+
+        <nav class="nav-links">
+            <button class="nav-link active" data-tab="tab-dashboard"><i class="fa-solid fa-chart-radar"></i> Live Radar</button>
+            <button class="nav-link" data-tab="tab-browse"><i class="fa-solid fa-box-archive"></i> Surplus Listings</button>
+            <button class="nav-link" data-tab="tab-post"><i class="fa-solid fa-circle-plus"></i> Post Surplus</button>
+            <button class="nav-link" data-tab="tab-impact"><i class="fa-solid fa-globe"></i> Impact Matrix</button>
+            <button class="nav-link" data-tab="tab-admin"><i class="fa-solid fa-shield-halved"></i> Admin HUD</button>
+        </nav>
+
+        <div class="nav-actions">
+            <!-- Audio FX Toggle -->
+            <button id="sound-toggle-btn" class="icon-btn" title="Toggle Sci-Fi Audio FX">
+                <i class="fa-solid fa-volume-high"></i>
+            </button>
+
+            <!-- Notifications Bell -->
+            <div class="notification-dropdown-wrapper">
+                <button id="notif-bell-btn" class="icon-btn relative">
+                    <i class="fa-solid fa-bell"></i>
+                    <span id="notif-badge" class="badge">3</span>
+                </button>
+                <div id="notif-dropdown" class="notif-dropdown hidden">
+                    <div class="notif-header">
+                        <span><i class="fa-solid fa-tower-broadcast"></i> SYSTEM TRANSMISSIONS</span>
+                        <button id="clear-notifs-btn" class="text-xs text-muted">Clear All</button>
+                    </div>
+                    <div id="notif-list" class="notif-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role Selector Dropdown -->
+            <div class="role-selector-container">
+                <i class="fa-solid fa-user-gear role-icon"></i>
+                <select id="role-select" class="cyber-select">
+                    <option value="donor">Role: Donor (Restaurant/Hotel)</option>
+                    <option value="ngo">Role: NGO / Food Bank</option>
+                    <option value="volunteer">Role: Volunteer Dispatcher</option>
+                    <option value="admin">Role: Central Admin</option>
+                </select>
+            </div>
+
+            <!-- SOS EMERGENCY BUTTON -->
+            <button id="sos-trigger-btn" class="cyber-btn sos-btn pulse-glow">
+                <i class="fa-solid fa-truck-medical"></i> SOS DISPATCH
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Dashboard -->
+    <main class="main-container">
+
+        <!-- TAB 1: LIVE RADAR / DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content active">
+            <!-- Top Hero Stats Panel -->
+            <div class="stats-grid">
+                <div class="stat-card neon-blue">
+                    <div class="stat-icon"><i class="fa-solid fa-utensils"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-meals-count">14,890</span>
+                        <span class="stat-label">MEALS RESCUED</span>
+                    </div>
+                    <div class="stat-sparkle"><i class="fa-solid fa-arrow-trend-up"></i> +12% TODAY</div>
+                </div>
+
+                <div class="stat-card neon-green">
+                    <div class="stat-icon"><i class="fa-solid fa-weight-hanging"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-kg-count">6,420 kg</span>
+                        <span class="stat-label">FOOD WASTAGE SAVED</span>
+                    </div>
+                    <div class="stat-sparkle"><i class="fa-solid fa-leaf"></i> 16.2t CO2 REDUCED</div>
+                </div>
+
+                <div class="stat-card neon-yellow">
+                    <div class="stat-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-active-count">8</span>
+                        <span class="stat-label">ACTIVE SURPLUS DROPS</span>
+                    </div>
+                    <div class="stat-sparkle pulsing"><i class="fa-solid fa-signal"></i> REALTIME SYNC</div>
+                </div>
+
+                <div class="stat-card neon-red">
+                    <div class="stat-icon"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-avg-time">18 mins</span>
+                        <span class="stat-label">AVG RESCUE SPEED</span>
+                    </div>
+                    <div class="stat-sparkle"><i class="fa-solid fa-stopwatch"></i> AUTONOMOUS ROUTING</div>
+                </div>
+            </div>
+
+            <!-- Main Layout: Interactive Radar + Quick Activity Stream -->
+            <div class="dashboard-split">
+                <!-- Map / Radar Panel -->
+                <div class="cyber-panel radar-panel">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-satellite-dish"></i> LIVE TACTICAL RADAR & DISPATCH MAP</h3>
+                        <div class="panel-controls">
+                            <span class="status-indicator online"><i class="fa-solid fa-circle"></i> SATELLITE LINK ACTIVE</span>
+                            <button id="recenter-map-btn" class="cyber-btn sm"><i class="fa-solid fa-crosshairs"></i> RECENTER</button>
+                        </div>
+                    </div>
+                    <div class="map-wrapper">
+                        <div id="map" class="cyber-map"></div>
+                        <div class="map-overlay-hud">
+                            <div class="hud-item"><span class="dot donor-dot"></span> Donors (<span id="map-donor-cnt">0</span>)</div>
+                            <div class="hud-item"><span class="dot ngo-dot"></span> NGOs (<span id="map-ngo-cnt">0</span>)</div>
+                            <div class="hud-item"><span class="dot active-dot"></span> Active Pickups (<span id="map-active-cnt">0</span>)</div>
+                            <div class="hud-item"><span class="dot sos-dot"></span> SOS Alerts (<span id="map-sos-cnt">0</span>)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Urgent Alerts & Live Activity -->
+                <div class="side-panel-column">
+                    <!-- Urgent Countdown Box -->
+                    <div class="cyber-panel urgent-panel">
+                        <div class="panel-header alert-header">
+                            <h3><i class="fa-solid fa-hourglass-half"></i> URGENT EXPIRY WATCHLIST</h3>
+                            <span class="badge red-badge">EXPIRING &lt; 2 HRS</span>
+                        </div>
+                        <div id="urgent-watchlist" class="urgent-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Live Stream Log -->
+                    <div class="cyber-panel feed-panel">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-list-check"></i> RESCUE DISPATCH LOG</h3>
+                        </div>
+                        <div id="live-dispatch-log" class="activity-feed">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: SURPLUS LISTINGS & CLAIMS -->
+        <section id="tab-browse" class="tab-content">
+            <div class="cyber-panel">
+                <div class="panel-header flex-between">
+                    <div>
+                        <h2><i class="fa-solid fa-boxes-stacked"></i> SURPLUS FOOD RESCUE INVENTORY</h2>
+                        <p class="subtitle">Search, filter and claim surplus food listings across your sector.</p>
+                    </div>
+                    <button class="cyber-btn primary-btn" onclick="app.switchTab('tab-post')">
+                        <i class="fa-solid fa-plus"></i> NEW DONATION POST
+                    </button>
+                </div>
+
+                <!-- Filters & Search Toolbar -->
+                <div class="filter-bar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="search-input" placeholder="Search by venue, donor name, food type, or location..." class="cyber-input">
+                    </div>
+
+                    <div class="filter-group">
+                        <select id="filter-category" class="cyber-select">
+                            <option value="all">All Categories</option>
+                            <option value="Cooked Meals">Cooked Meals / Buffet</option>
+                            <option value="Bakery & Pastry">Bakery & Pastries</option>
+                            <option value="Packaged Foods">Packaged / Canned</option>
+                            <option value="Fresh Produce">Fresh Produce / Fruits</option>
+                            <option value="Beverages">Beverages & Dairy</option>
+                        </select>
+
+                        <select id="filter-status" class="cyber-select">
+                            <option value="all">All Statuses</option>
+                            <option value="Available">Available for Claim</option>
+                            <option value="Accepted">Accepted / Reserved</option>
+                            <option value="Picked Up">En Route / Picked Up</option>
+                            <option value="Completed">Completed Rescue</option>
+                        </select>
+
+                        <select id="filter-urgency" class="cyber-select">
+                            <option value="all">Any Urgency</option>
+                            <option value="sos">SOS Emergency Only</option>
+                            <option value="critical">Critical (&lt; 1hr left)</option>
+                        </select>
+
+                        <button id="reset-filters-btn" class="cyber-btn text-sm"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                    </div>
+                </div>
+
+                <!-- Card Grid -->
+                <div id="donations-grid" class="donations-grid">
+                    <!-- Cards rendered dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: POST SURPLUS DONATION -->
+        <section id="tab-post" class="tab-content">
+            <div class="cyber-panel post-panel">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-bullhorn"></i> TRANSMIT SURPLUS DONATION LISTING</h2>
+                    <p class="subtitle">Broadcast excess food availability to certified nearby NGOs and volunteer couriers.</p>
+                </div>
+
+                <form id="post-donation-form" class="cyber-form">
+                    <div class="form-grid">
+                        <div class="form-group col-span-2">
+                            <label for="post-title"><i class="fa-solid fa-heading"></i> Food Listing Title *</label>
+                            <input type="text" id="post-title" required class="cyber-input" placeholder="e.g. Grand Banquet Surplus - 120 Servings Italian & Indian Buffet">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="post-category"><i class="fa-solid fa-layer-group"></i> Food Category *</label>
+                            <select id="post-category" required class="cyber-select">
+                                <option value="Cooked Meals">Cooked Meals / Buffet</option>
+                                <option value="Bakery & Pastry">Bakery & Pastries</option>
+                                <option value="Packaged Foods">Packaged / Sealed</option>
+                                <option value="Fresh Produce">Fresh Produce</option>
+                                <option value="Beverages">Beverages & Dairy</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="post-quantity"><i class="fa-solid fa-weight-scale"></i> Quantity (kg or Servings) *</label>
+                            <input type="text" id="post-quantity" required class="cyber-input" placeholder="e.g. 45 kg (approx 100 meals)">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="post-donor"><i class="fa-solid fa-building"></i> Donor Organization Name *</label>
+                            <input type="text" id="post-donor" required class="cyber-input" placeholder="e.g. CyberCity Convention Center">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="post-location"><i class="fa-solid fa-location-dot"></i> Pickup Address / Sector *</label>
+                            <input type="text" id="post-location" required class="cyber-input" placeholder="e.g. Sector 4, Tech Park, Block B">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="post-expiry-hours"><i class="fa-solid fa-clock"></i> Expiry Time Window *</label>
+                            <select id="post-expiry-hours" class="cyber-select">
+                                <option value="1">Critical Expiry: 1 Hour</option>
+                                <option value="2" selected>Urgent Expiry: 2 Hours</option>
+                                <option value="4">Standard Expiry: 4 Hours</option>
+                                <option value="8">Extended Expiry: 8 Hours</option>
+                                <option value="24">Sealed / Packaged: 24 Hours</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="post-storage"><i class="fa-solid fa-snowflake"></i> Storage Requirements</label>
+                            <select id="post-storage" class="cyber-select">
+                                <option value="Refrigerated Required">Refrigerated / Cold Storage</option>
+                                <option value="Thermal Heated">Keep Hot / Insulated</option>
+                                <option value="Room Temperature" selected>Room Temperature Standard</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group col-span-2">
+                            <label for="post-notes"><i class="fa-solid fa-file-lines"></i> Special Pickup Notes / Allergen Warnings</label>
+                            <textarea id="post-notes" rows="3" class="cyber-textarea" placeholder="Provide packaging info, loading dock gate number, or contact phone..."></textarea>
+                        </div>
+
+                        <div class="form-group col-span-2 checkbox-group">
+                            <label class="cyber-checkbox-label">
+                                <input type="checkbox" id="post-is-sos">
+                                <span class="checkbox-custom"></span>
+                                <span class="sos-checkbox-text"><i class="fa-solid fa-triangle-exclamation"></i> MARK AS CRITICAL SOS EMERGENCY (Broadcasting highest priority rescue signal)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="cyber-btn secondary-btn" onclick="app.switchTab('tab-browse')">CANCEL</button>
+                        <button type="submit" class="cyber-btn primary-btn large-btn">
+                            <i class="fa-solid fa-paper-plane"></i> TRANSMIT SURPLUS LISTING
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- TAB 4: IMPACT MATRIX & LEADERBOARD -->
+        <section id="tab-impact" class="tab-content">
+            <div class="cyber-panel">
+                <div class="panel-header">
+                    <h2><i class="fa-solid fa-chart-pie"></i> SUSTAINABILITY IMPACT MATRIX</h2>
+                    <p class="subtitle">Autonomous tracking of hunger mitigation, carbon offset, and top donor champions.</p>
+                </div>
+
+                <div class="impact-layout">
+                    <div class="impact-cards">
+                        <div class="impact-box">
+                            <div class="impact-number">98.4%</div>
+                            <div class="impact-label">SURPLUS RESCUE SUCCESS RATE</div>
+                            <div class="impact-bar"><div class="fill" style="width: 98.4%;"></div></div>
+                        </div>
+                        <div class="impact-box">
+                            <div class="impact-number">42,190</div>
+                            <div class="impact-label">TOTAL BENEFICIARIES SERVED</div>
+                            <div class="impact-bar"><div class="fill green" style="width: 85%;"></div></div>
+                        </div>
+                        <div class="impact-box">
+                            <div class="impact-number">51.8 Tons</div>
+                            <div class="impact-label">CO2 EMISSIONS PREVENTED</div>
+                            <div class="impact-bar"><div class="fill yellow" style="width: 92%;"></div></div>
+                        </div>
+                    </div>
+
+                    <!-- Leaderboard Panel -->
+                    <div class="cyber-panel inner-panel">
+                        <h3><i class="fa-solid fa-trophy"></i> SECTOR RESCUE LEADERBOARD</h3>
+                        <table class="cyber-table">
+                            <thead>
+                                <tr>
+                                    <th>RANK</th>
+                                    <th>ORGANIZATION</th>
+                                    <th>TYPE</th>
+                                    <th>SURPLUS RESCUED</th>
+                                    <th>BADGE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="rank gold">#1</span></td>
+                                    <td>Skyline Grand Hotel & Suites</td>
+                                    <td>Hotel / Resort</td>
+                                    <td>2,450 kg</td>
+                                    <td><span class="badge gold-badge"><i class="fa-solid fa-award"></i> TITAN DONOR</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="rank silver">#2</span></td>
+                                    <td>TechHub Central Cafeteria</td>
+                                    <td>Corporate Kitchen</td>
+                                    <td>1,890 kg</td>
+                                    <td><span class="badge silver-badge"><i class="fa-solid fa-medal"></i> HERO DONOR</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="rank bronze">#3</span></td>
+                                    <td>Metropolis Event Arena</td>
+                                    <td>Event Venue</td>
+                                    <td>1,420 kg</td>
+                                    <td><span class="badge bronze-badge"><i class="fa-solid fa-shield"></i> GUARDIAN</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="rank">#4</span></td>
+                                    <td>BakeCraft Artisanal Chain</td>
+                                    <td>Bakery</td>
+                                    <td>980 kg</td>
+                                    <td><span class="badge cyan-badge">ECO CHAMPION</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: ADMIN HUD & VERIFICATION -->
+        <section id="tab-admin" class="tab-content">
+            <div class="cyber-panel">
+                <div class="panel-header flex-between">
+                    <div>
+                        <h2><i class="fa-solid fa-shield-cat"></i> SYSTEM ADMIN & VERIFICATION CONSOLE</h2>
+                        <p class="subtitle">Verify organization credentials, purge expired data, monitor volunteer vectors.</p>
+                    </div>
+                    <button id="purge-expired-btn" class="cyber-btn danger-sm">
+                        <i class="fa-solid fa-dumpster-fire"></i> PURGE EXPIRED LISTINGS
+                    </button>
+                </div>
+
+                <div class="admin-grid">
+                    <!-- Donor Verification Table -->
+                    <div class="cyber-panel inner-panel">
+                        <h3><i class="fa-solid fa-user-check"></i> PENDING DONOR & NGO VERIFICATIONS</h3>
+                        <table class="cyber-table">
+                            <thead>
+                                <tr>
+                                    <th>ENTITY NAME</th>
+                                    <th>ROLE TYPE</th>
+                                    <th>LICENSE #</th>
+                                    <th>STATUS</th>
+                                    <th>ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-verification-table">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- System Health & Data Maintenance -->
+                    <div class="cyber-panel inner-panel">
+                        <h3><i class="fa-solid fa-sliders"></i> SYSTEM DIAGNOSTICS</h3>
+                        <div class="diag-list">
+                            <div class="diag-item">
+                                <span>AI Matching Algorithm</span>
+                                <span class="text-green"><i class="fa-solid fa-circle-check"></i> OPTIMAL</span>
+                            </div>
+                            <div class="diag-item">
+                                <span>Active Satellite Grid Pings</span>
+                                <span class="text-cyan"><i class="fa-solid fa-wifi"></i> 99.8% UP</span>
+                            </div>
+                            <div class="diag-item">
+                                <span>Verified NGO Entities</span>
+                                <span>34 Verified</span>
+                            </div>
+                        </div>
+
+                        <div class="admin-actions-box margin-top">
+                            <button id="seed-data-reset-btn" class="cyber-btn secondary-btn full-width">
+                                <i class="fa-solid fa-rotate"></i> RESET SYSTEM TO DEFAULT SEED DATA
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: SOS EMERGENCY DISPATCH PROMPT -->
+    <div id="sos-modal" class="cyber-modal-overlay hidden">
+        <div class="cyber-modal sos-modal-box">
+            <div class="modal-header danger-header">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i> TRANSMIT CRITICAL SOS RESCUE SIGNAL</h3>
+                <button class="modal-close-btn" onclick="app.closeSosModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="warning-text">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <strong>SOS Mode</strong> broadcasts an immediate high-priority beacon to all nearby NGO rapid-response teams & emergency volunteer couriers! Use for large perishable volume or urgent starvation alerts.
+                </p>
+
+                <form id="sos-form" class="cyber-form">
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-building"></i> Donor / Emergency Beacon Source</label>
+                        <input type="text" id="sos-source" required class="cyber-input" placeholder="e.g. Royal Palace Hotel Ballroom">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-layer-group"></i> Perishable Food Type & Quantity</label>
+                        <input type="text" id="sos-food" required class="cyber-input" placeholder="e.g. 150 kg Fresh Prepared Gourmet Meals">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-location-crosshairs"></i> Exact Sector / Dispatch Address</label>
+                        <input type="text" id="sos-location" required class="cyber-input" placeholder="e.g. Gate 3, Central Tech Park">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-clock"></i> Critical Window</label>
+                        <select id="sos-time" class="cyber-select">
+                            <option value="30 mins">EXPIRES IN 30 MINUTES (EXTREME URGENCY)</option>
+                            <option value="1 hour" selected>EXPIRES IN 1 HOUR</option>
+                            <option value="2 hours">EXPIRES IN 2 HOURS</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="cyber-btn secondary-btn" onclick="app.closeSosModal()">CANCEL</button>
+                        <button type="submit" class="cyber-btn sos-btn pulse-glow">
+                            <i class="fa-solid fa-tower-broadcast"></i> BROADCAST SOS NOW
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: DONATION DETAILS & CLAIM STATUS DISPATCH -->
+    <div id="details-modal" class="cyber-modal-overlay hidden">
+        <div class="cyber-modal details-modal-box">
+            <div class="modal-header">
+                <h3 id="modal-detail-title">Surplus Details</h3>
+                <button class="modal-close-btn" onclick="app.closeDetailsModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="modal-detail-content">
+                <!-- Renders dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footbar / Cyber Status Strip -->
+    <footer class="cyber-footer">
+        <div class="footer-status">
+            <span><i class="fa-solid fa-shield-halved"></i> SECURE ENCRYPTED NODE</span>
+            <span class="sep">|</span>
+            <span>FOOD RESCUE DISPATCH NETWORK v4.9</span>
+            <span class="sep">|</span>
+            <span class="text-green"><i class="fa-solid fa-signal"></i> 100% ONLINE</span>
+        </div>
+        <div class="footer-links">
+            <a href="#" onclick="app.triggerDemoNotif(); return false;"><i class="fa-solid fa-paper-plane"></i> Test Notification Toast</a>
+        </div>
+    </footer>
+
+    <!-- Leaflet JS CDN for Maps -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
