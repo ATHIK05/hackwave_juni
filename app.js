@@ -20,6 +20,7 @@ class RescueNetApp {
         this.initAudioContext();
         this.initCanvasBackground();
         this.initNavigation();
+        this.checkUserSession();
         this.initNotifications();
         this.initMap();
         this.initDonationGrid();
@@ -221,6 +222,34 @@ class RescueNetApp {
             sosDismissBtn.addEventListener('click', () => {
                 document.getElementById('sos-alert-banner').classList.add('hidden');
             });
+        }
+    }
+
+    checkUserSession() {
+        try {
+            const rawUser = localStorage.getItem('rescue_user');
+            if (rawUser) {
+                const user = JSON.parse(rawUser);
+                const loginBtn = document.getElementById('nav-login-btn');
+                const profileBadge = document.getElementById('nav-profile-badge');
+                const userNameElem = document.getElementById('nav-user-name');
+
+                if (loginBtn && profileBadge) {
+                    loginBtn.classList.add('hidden');
+                    profileBadge.classList.remove('hidden');
+                    if (userNameElem) userNameElem.innerText = user.name || 'Verified Agent';
+                }
+
+                if (user.role) {
+                    const roleSelect = document.getElementById('role-select');
+                    if (roleSelect) {
+                        roleSelect.value = user.role;
+                        this.currentRole = user.role;
+                    }
+                }
+            }
+        } catch (e) {
+            console.error("User session check failed:", e);
         }
     }
 

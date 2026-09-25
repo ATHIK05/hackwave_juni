@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foodo | Secure Sign In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root { --ink: #f4f8f5; --muted: #99aaa4; --panel: rgba(12, 27, 29, .82); --line: rgba(214, 245, 225, .14); --mint: #8df0b5; --teal: #2cc6ad; --coral: #ff897b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { min-height: 100vh; color: var(--ink); font-family: 'DM Sans', sans-serif; background: #071719; overflow-x: hidden; }
+        body::before, body::after { content: ''; position: fixed; z-index: -1; border-radius: 50%; filter: blur(4px); pointer-events: none; }
+        body::before { width: 520px; height: 520px; top: -180px; right: -140px; background: rgba(44, 198, 173, .16); }
+        body::after { width: 420px; height: 420px; bottom: -180px; left: -140px; background: rgba(255, 137, 123, .1); }
+        .page-shell { min-height: 100vh; display: grid; place-items: center; padding: 32px 20px; background: linear-gradient(135deg, rgba(7, 23, 25, .95), rgba(11, 37, 35, .8)); }
+        .auth-card { width: min(100%, 1050px); min-height: 650px; display: grid; grid-template-columns: .92fr 1.08fr; border: 1px solid var(--line); border-radius: 28px; overflow: hidden; background: var(--panel); box-shadow: 0 30px 90px rgba(0, 0, 0, .42); backdrop-filter: blur(22px); animation: rise .65s ease both; }
+        .story { position: relative; display: flex; flex-direction: column; justify-content: space-between; padding: 42px; background: linear-gradient(155deg, rgba(34, 105, 89, .96), rgba(10, 45, 44, .94) 55%, rgba(18, 35, 38, .96)); overflow: hidden; }
+        .story::after { content: ''; position: absolute; width: 290px; height: 290px; right: -95px; bottom: 100px; border: 1px solid rgba(141, 240, 181, .22); border-radius: 45% 55% 60% 40%; transform: rotate(25deg); }
+        .brand { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.25rem; letter-spacing: .2px; }
+        .brand-mark { display: grid; place-items: center; width: 40px; height: 40px; color: #0b3a32; background: var(--mint); border-radius: 12px; box-shadow: 0 8px 24px rgba(141, 240, 181, .22); }
+        .story-copy { position: relative; z-index: 1; max-width: 380px; }
+        .eyebrow { margin-bottom: 16px; color: var(--mint); font-size: .72rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+        .story h1 { max-width: 360px; margin-bottom: 18px; font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.2rem, 4vw, 3.7rem); line-height: 1.02; letter-spacing: -.06em; }
+        .story p { color: #c1d6cd; line-height: 1.7; }
+        .impact-row { position: relative; z-index: 1; display: flex; gap: 28px; padding-top: 26px; border-top: 1px solid rgba(214, 245, 225, .18); }
+        .impact strong { display: block; color: var(--mint); font-family: 'Space Grotesk', sans-serif; font-size: 1.35rem; }
+        .impact span { color: #b3ccc2; font-size: .78rem; }
+        .form-area { display: flex; align-items: center; padding: 52px clamp(28px, 6vw, 74px); background: rgba(8, 22, 24, .72); }
+        .form-content { width: 100%; max-width: 420px; margin: 0 auto; }
+        .form { display: none; animation: fade .3s ease both; }
+        .form.active { display: block; }
+        .form h2 { margin-bottom: 8px; font-family: 'Space Grotesk', sans-serif; font-size: 2rem; letter-spacing: -.04em; }
+        .subtitle { margin-bottom: 30px; color: var(--muted); line-height: 1.55; }
+        .field { margin-bottom: 17px; }
+        .field label { display: block; margin-bottom: 8px; color: #d7e5de; font-size: .82rem; font-weight: 600; }
+        .input-wrap { position: relative; }
+        .input-wrap i { position: absolute; top: 16px; left: 16px; color: #6c8b82; }
+        input { width: 100%; padding: 14px 16px 14px 44px; border: 1px solid var(--line); border-radius: 12px; outline: none; color: var(--ink); background: rgba(255, 255, 255, .055); font: inherit; transition: border-color .2s, box-shadow .2s, background .2s; }
+        input:focus { border-color: var(--mint); background: rgba(141, 240, 181, .07); box-shadow: 0 0 0 4px rgba(141, 240, 181, .09); }
+        input::placeholder { color: #6d817a; }
+        .form-options { display: flex; justify-content: space-between; align-items: center; margin: 4px 0 23px; color: var(--muted); font-size: .78rem; }
+        .check { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+        .check input { width: auto; accent-color: var(--teal); }
+        .text-button, .link { border: 0; color: var(--mint); background: none; font: inherit; cursor: pointer; }
+        .text-button:hover, .link:hover { color: white; }
+        .primary { width: 100%; padding: 15px; border: 0; border-radius: 12px; color: #08352d; background: var(--mint); font: 700 .94rem 'DM Sans', sans-serif; cursor: pointer; box-shadow: 0 10px 24px rgba(141, 240, 181, .14); transition: transform .2s, background .2s; }
+        .primary:hover { transform: translateY(-2px); background: #b1f7c9; }
+        .secondary { width: 100%; margin-top: 12px; padding: 13px; border: 1px solid var(--line); border-radius: 12px; color: #d7e5de; background: transparent; font: 600 .88rem 'DM Sans', sans-serif; cursor: pointer; }
+        .secondary:hover { background: rgba(255, 255, 255, .06); }
+        .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; color: #688078; font-size: .72rem; text-transform: uppercase; letter-spacing: .12em; }
+        .divider::before, .divider::after { content: ''; height: 1px; flex: 1; background: var(--line); }
+        .switch { margin-top: 26px; color: var(--muted); text-align: center; font-size: .86rem; }
+        .message { min-height: 23px; margin-top: 17px; color: var(--muted); text-align: center; font-size: .82rem; }
+        .otp { display: none; margin-top: 22px; padding: 18px; border: 1px solid rgba(141, 240, 181, .2); border-radius: 14px; background: rgba(141, 240, 181, .055); }
+        .otp.active { display: block; animation: fade .3s ease both; }
+        .otp-title { margin-bottom: 5px; color: var(--mint); font-weight: 700; }
+        .otp-hint { margin-bottom: 13px; color: var(--muted); font-size: .78rem; }
+        .otp input { letter-spacing: .42em; text-align: center; font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; }
+        .back { display: block; margin: 14px auto 0; }
+        .signup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+        @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 760px) { .auth-card { grid-template-columns: 1fr; min-height: auto; } .story { min-height: 330px; padding: 28px; } .story h1 { font-size: 2.45rem; } .form-area { padding: 38px 24px; } }
+        @media (max-width: 440px) { .page-shell { padding: 0; } .auth-card { border: 0; border-radius: 0; min-height: 100vh; } .story { min-height: 300px; } .signup-grid { display: block; } }
+    </style>
+</head>
+
+<body>
+    <main class="page-shell">
+        <section class="auth-card" aria-label="Foodo account access">
+            <aside class="story">
+                <div class="brand"><span class="brand-mark"><i class="fa-solid fa-leaf"></i></span> foodo</div>
+                <div class="story-copy">
+                    <div class="eyebrow">Food rescue network</div>
+                    <h1>Good food deserves a second route.</h1>
+                    <p>Connect with the people moving surplus food where it matters most, one verified handoff at a time.</p>
+                </div>
+                <div class="impact-row">
+                    <div class="impact"><strong>14.8k</strong><span>meals rescued</span></div>
+                    <div class="impact"><strong>18 min</strong><span>average dispatch</span></div>
+                </div>
+            </aside>
+
+            <div class="form-area">
+                <div class="form-content">
+                    <div id="loginForm" class="form active">
+                        <h2>Welcome back</h2>
+                        <p class="subtitle">Sign in securely to continue to your rescue dashboard.</p>
+                        <div class="field">
+                            <label for="loginEmail">Email or phone</label>
+                            <div class="input-wrap"><i class="fa-regular fa-user"></i><input type="text" id="loginEmail" placeholder="you@example.com" autocomplete="username"></div>
+                        </div>
+                        <div class="field">
+                            <label for="loginPassword">Password</label>
+                            <div class="input-wrap"><i class="fa-solid fa-lock"></i><input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password"></div>
+                        </div>
+                        <div class="form-options">
+                            <label class="check"><input type="checkbox"> Keep me signed in</label>
+                            <button class="text-button" type="button" onclick="forgotPassword()">Forgot password?</button>
+                        </div>
+                        <button class="primary" type="button" onclick="login()"><i class="fa-solid fa-arrow-right-to-bracket"></i> Continue with OTP</button>
+                        <div id="loginOtpBox" class="otp">
+                            <div class="otp-title"><i class="fa-solid fa-shield-halved"></i> Verify your sign in</div>
+                            <p class="otp-hint">Enter the 6-digit code sent to your contact. Demo code: <strong>123456</strong></p>
+                            <input type="text" id="loginOtp" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code">
+                            <button class="primary" type="button" onclick="verifyLoginOTP()">Verify and enter dashboard</button>
+                            <button class="text-button back" type="button" onclick="resetLoginOTP()">Use a different account</button>
+                        </div>
+                        <div class="divider">or</div>
+                        <button class="secondary" type="button" onclick="showSignup()"><i class="fa-regular fa-id-card"></i> Create a new account</button>
+                        <p class="switch">Protected access for donors, NGOs, volunteers, and admins.</p>
+                    </div>
+
+                    <div id="signupForm" class="form">
+                        <h2>Create your account</h2>
+                        <p class="subtitle">Join the network and start coordinating food rescue.</p>
+                        <div class="signup-grid">
+                            <div class="field"><label for="name">Full name</label><div class="input-wrap"><i class="fa-regular fa-id-badge"></i><input type="text" id="name" placeholder="Your name"></div></div>
+                            <div class="field"><label for="phone">Phone number</label><div class="input-wrap"><i class="fa-solid fa-phone"></i><input type="text" id="phone" placeholder="Your phone"></div></div>
+                        </div>
+                        <div class="field"><label for="email">Email address</label><div class="input-wrap"><i class="fa-regular fa-envelope"></i><input type="email" id="email" placeholder="you@example.com"></div></div>
+                        <div class="signup-grid">
+                            <div class="field"><label for="password">Password</label><div class="input-wrap"><i class="fa-solid fa-key"></i><input type="password" id="password" placeholder="Create password"></div></div>
+                            <div class="field"><label for="confirmPassword">Confirm password</label><div class="input-wrap"><i class="fa-solid fa-check"></i><input type="password" id="confirmPassword" placeholder="Repeat password"></div></div>
+                        </div>
+                        <button class="primary" type="button" onclick="sendOTP()"><i class="fa-solid fa-paper-plane"></i> Send verification code</button>
+                        <div id="otpBox" class="otp">
+                            <div class="otp-title"><i class="fa-solid fa-circle-check"></i> Verify your email</div>
+                            <p class="otp-hint">Use the demo code <strong>123456</strong> to finish creating your account.</p>
+                            <input type="text" id="otp" inputmode="numeric" maxlength="6" placeholder="000000">
+                            <button class="primary" type="button" onclick="verifyOTP()">Verify and create account</button>
+                        </div>
+                        <button class="text-button back" type="button" onclick="showLogin()">Back to sign in</button>
+                    </div>
+                    <p id="message" class="message" role="status" aria-live="polite"></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+
+    <script>
+
+        // Show Sign Up
+        function showSignup() {
+
+            document.getElementById("loginForm")
+                .classList.remove("active");
+
+            document.getElementById("signupForm")
+                .classList.add("active");
+
+            clearMessage();
+        }
+
+
+        // Show Login
+        function showLogin() {
+
+            document.getElementById("signupForm")
+                .classList.remove("active");
+
+            document.getElementById("loginForm")
+                .classList.add("active");
+
+            clearMessage();
+        }
+
+
+        // Login
+        function login() {
+
+            const email = document.getElementById("loginEmail").value.trim();
+            const password = document.getElementById("loginPassword").value;
+
+            if (email === "" || password === "") {
+
+                showMessage("Please fill all fields.", "red");
+                return;
+            }
+
+            document.getElementById("loginOtpBox").classList.add("active");
+            showMessage("Verification code sent. Enter 123456 for this demo.", "#8df0b5");
+            document.getElementById("loginOtp").focus();
+        }
+
+        function verifyLoginOTP() {
+            const otp = document.getElementById("loginOtp").value.trim();
+            if (otp !== "123456") {
+                showMessage("That code is not correct. Try again.", "#ff897b");
+                return;
+            }
+
+            const email = document.getElementById("loginEmail").value.trim();
+            localStorage.setItem("rescue_user", JSON.stringify({
+                name: email.split("@")[0],
+                email: email,
+                authMethod: "Password + OTP"
+            }));
+            window.location.replace("index.html");
+        }
+
+        function resetLoginOTP() {
+            document.getElementById("loginOtpBox").classList.remove("active");
+            document.getElementById("loginOtp").value = "";
+            clearMessage();
+        }
+
+
+        // Send OTP
+        function sendOTP() {
+
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const phone = document.getElementById("phone").value;
+            const password = document.getElementById("password").value;
+            const confirmPassword =
+                document.getElementById("confirmPassword").value;
+
+            if (
+                name === "" ||
+                email === "" ||
+                phone === "" ||
+                password === "" ||
+                confirmPassword === ""
+            ) {
+
+                showMessage("Please fill all fields.", "red");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+
+                showMessage("Passwords do not match.", "red");
+                return;
+            }
+
+            document.getElementById("otpBox")
+                .classList.add("active");
+
+            showMessage("Verification code sent. Use 123456 for this demo.", "#8df0b5");
+            document.getElementById("otp").focus();
+        }
+
+
+        // Verify OTP
+        function verifyOTP() {
+
+            const otp = document.getElementById("otp").value;
+
+            if (otp === "123456") {
+
+                localStorage.setItem("rescue_user", JSON.stringify({
+                    name: document.getElementById("name").value.trim(),
+                    email: document.getElementById("email").value.trim(),
+                    phone: document.getElementById("phone").value.trim(),
+                    authMethod: "Signup OTP"
+                }));
+
+                showMessage(
+                    "Account created successfully!",
+                    "lightgreen"
+                );
+
+                setTimeout(() => {
+                    window.location.replace("index.html");
+                }, 1500);
+
+            } else {
+
+                showMessage("Invalid OTP.", "red");
+            }
+        }
+
+
+        // Forgot password
+        function forgotPassword() {
+
+            const email =
+                document.getElementById("loginEmail").value;
+
+            if (email === "") {
+
+                showMessage(
+                    "Enter your email or phone first.",
+                    "orange"
+                );
+
+            } else {
+
+                showMessage(
+                    "Password reset OTP sent!",
+                    "lightgreen"
+                );
+            }
+        }
+
+
+        // Message
+        function showMessage(text, color) {
+
+            const message =
+                document.getElementById("message");
+
+            message.innerText = text;
+            message.style.color = color;
+        }
+
+
+        function clearMessage() {
+
+            document.getElementById("message").innerText = "";
+
+        }
+
+    </script>
+
+</body>
+
+</html>

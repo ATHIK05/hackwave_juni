@@ -1,4 +1,4 @@
-/* RESCUE-NET - Professional Food Rescue & Redistribution CSS Architecture */
+/* Foodo - Professional Food Rescue & Redistribution CSS Architecture */
 
 :root {
     --bg-dark: #080d19;
@@ -1559,4 +1559,75 @@ body {
 
 .footer-links a:hover {
     text-shadow: 0 0 8px var(--cyan-glow);
+}
+
+/* User Navbar Widget */
+.nav-user-widget {
+    display: flex;
+    align-items: center;
+}
+
+.highlight-border {
+    border: 1px solid var(--cyan-accent);
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--cyan);
+}
+
+.highlight-border:hover {
+    background: rgba(56, 189, 248, 0.2);
+    box-shadow: 0 0 15px var(--cyan-glow);
+}
+
+.nav-profile-badge {
+    display: flex;
+    align-items: center;
+}
+
+.profile-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    padding: 5px 12px;
+    border-radius: 20px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.25s ease;
+}
+
+.profile-nav-link:hover {
+    background: rgba(16, 185, 129, 0.2);
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+    transform: translateY(-1px);
+}
+
+.mini-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #10b981, #0284c7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 0.8rem;
+}
+
+.user-mini-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.user-status-tag {
+    font-size: 0.65rem;
+    color: #10b981;
+    font-weight: 700;
 }

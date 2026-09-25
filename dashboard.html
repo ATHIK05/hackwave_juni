@@ -14,16 +14,14 @@
     <!-- Leaflet CSS for Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="styles.css">
+    <script>
+        // Instant auth gate — blocks before body renders
+        if (!localStorage.getItem('rescue_user')) {
+            window.location.replace('login.html');
+        }
+    </script>
 </head>
 <body class="theme-pleasant">
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const session = localStorage.getItem('rescue_user');
-  if (!session) {
-    window.location.href = 'login.html';
-  }
-});
-</script>
     <!-- Background Animated Grid Canvas -->
     <canvas id="bg-canvas"></canvas>
     <div class="scanline-overlay"></div>
