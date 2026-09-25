@@ -1,0 +1,51 @@
+rules_version = '2';
+
+// Rescue Net — Firestore rules (Spark plan friendly)
+// Prototype-safe defaults: anyone signed in (including anonymous)
+// may read the public operational board and write rescue records.
+// Tighten `isStaff()` with custom claims before a real launch.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isStaff() {
+      return signedIn() && request.auth.token.staff == true;
+    }
+
+    // Public operational board — readable by anyone, writable by signed-in users.
+    match /donations/{id} {
+      allow read: if true;
+      allow create, update: if signedIn();
+      allow delete: if isStaff();
+    }
+
+    match /notifications/{id} {
+      allow read: if true;
+      allow create, update, delete: if signedIn();
+    }
+
+    match /activity/{id} {
+      allow read: if true;
+      allow create: if signedIn();
+      allow update, delete: if isStaff();
+    }
+
+    // Reference data — read-only for clients, managed by the seeder/coordinators.
+    match /organisations/{id} { allow read: if true; allow write: if isStaff(); }
+    match /volunteers/{id}    { allow read: if true; allow write: if isStaff(); }
+    match /impact_daily/{id}  { allow read: if true; allow write: if isStaff(); }
+
+    // Compliance queue — visible to signed-in users, resolved by coordinators.
+    match /verifications/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn();
+      allow update, delete: if isStaff();
+    }
+
+    // Everything else is denied.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

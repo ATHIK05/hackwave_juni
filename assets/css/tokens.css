@@ -1,0 +1,171 @@
+/* ============================================================
+   RESCUE NET — Design Tokens
+   "Aurora Glass" — a fresh, light, premium system.
+   ============================================================ */
+
+:root {
+  /* ---- Brand ramp: Verdant (primary) ---- */
+  --verdant-50:  #eefbf4;
+  --verdant-100: #d5f5e4;
+  --verdant-200: #aeeaca;
+  --verdant-300: #77d8ab;
+  --verdant-400: #3dbe87;
+  --verdant-500: #17a06c;
+  --verdant-600: #0b8157;
+  --verdant-700: #0a6748;
+  --verdant-800: #0a523a;
+  --verdant-900: #084331;
+
+  /* ---- Accent ramp: Indigo (structure / data) ---- */
+  --indigo-50:  #eef2ff;
+  --indigo-100: #e0e7ff;
+  --indigo-200: #c7d2fe;
+  --indigo-300: #a5b4fc;
+  --indigo-400: #818cf8;
+  --indigo-500: #6366f1;
+  --indigo-600: #4f46e5;
+  --indigo-700: #4338ca;
+
+  /* ---- Signal ramp: Coral (urgency / SOS) ---- */
+  --coral-50:  #fff1f2;
+  --coral-100: #ffe4e6;
+  --coral-200: #fecdd3;
+  --coral-400: #fb7185;
+  --coral-500: #f43f5e;
+  --coral-600: #e11d48;
+  --coral-700: #be123c;
+
+  /* ---- Warm ramp: Amber (watch / pending) ---- */
+  --amber-50:  #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-200: #fde68a;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+
+  /* ---- Neutral ink (high contrast on light) ---- */
+  --ink-900: #0b1220;  /* headline */
+  --ink-800: #131c2e;
+  --ink-700: #1f2a3d;  /* body strong */
+  --ink-600: #36435b;  /* body */
+  --ink-500: #4f5d75;  /* secondary */
+  --ink-400: #6b7a92;  /* muted but still AA on glass */
+  --ink-300: #93a0b4;
+
+  /* ---- Surfaces ---- */
+  --canvas:        #f4f6fb;
+  --canvas-warm:   #fbfaf7;
+  --surface:       #ffffff;
+  --surface-2:     #f8fafc;
+  --hairline:      rgba(15, 23, 42, 0.08);
+  --hairline-soft: rgba(15, 23, 42, 0.05);
+  --hairline-strong: rgba(15, 23, 42, 0.14);
+
+  /* ---- Glass (light glassmorphism, tuned for legibility) ---- */
+  --glass-bg:        rgba(255, 255, 255, 0.72);
+  --glass-bg-strong: rgba(255, 255, 255, 0.86);
+  --glass-bg-soft:   rgba(255, 255, 255, 0.55);
+  --glass-border:    rgba(255, 255, 255, 0.85);
+  --glass-edge:      rgba(15, 23, 42, 0.06);
+  --glass-blur:      22px;
+  --glass-blur-lg:   38px;
+
+  /* ---- Elevation: soft, layered, never muddy ---- */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 10px 24px -12px rgba(15, 23, 42, 0.18), 0 2px 8px rgba(15, 23, 42, 0.05);
+  --shadow-lg: 0 24px 48px -24px rgba(15, 23, 42, 0.24), 0 6px 16px -8px rgba(15, 23, 42, 0.08);
+  --shadow-xl: 0 48px 90px -40px rgba(11, 18, 32, 0.34), 0 12px 32px -16px rgba(15, 23, 42, 0.12);
+  --shadow-glow-verdant: 0 18px 40px -20px rgba(11, 129, 87, 0.55);
+  --shadow-glow-coral:   0 18px 40px -20px rgba(225, 29, 72, 0.45);
+  --shadow-inset-top: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  /* ---- Radii ---- */
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-xl: 28px;
+  --r-2xl: 36px;
+  --r-pill: 999px;
+
+  /* ---- Type ---- */
+  --font-display: "Sora", "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Plus Jakarta Sans", ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --fs-display: clamp(2.75rem, 1.4rem + 4.6vw, 5.1rem);
+  --fs-h1: clamp(2.1rem, 1.3rem + 2.6vw, 3.4rem);
+  --fs-h2: clamp(1.6rem, 1.2rem + 1.5vw, 2.35rem);
+  --fs-h3: clamp(1.22rem, 1.05rem + 0.6vw, 1.55rem);
+  --fs-lead: clamp(1.02rem, 0.96rem + 0.4vw, 1.22rem);
+  --fs-body: 1rem;
+  --fs-sm: 0.9125rem;
+  --fs-xs: 0.8125rem;
+  --fs-micro: 0.72rem;
+
+  --lh-tight: 1.06;
+  --lh-snug: 1.22;
+  --lh-body: 1.62;
+
+  --track-tight: -0.028em;
+  --track-normal: -0.011em;
+  --track-wide: 0.08em;
+  --track-caps: 0.14em;
+
+  /* ---- Space ---- */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 20px; --s-6: 24px; --s-7: 32px; --s-8: 40px;
+  --s-9: 48px; --s-10: 64px; --s-11: 80px; --s-12: 112px;
+
+  /* ---- Motion: one spring language ---- */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-swift:    cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in-out:   cubic-bezier(0.65, 0, 0.35, 1);
+
+  --t-micro: 120ms;
+  --t-fast: 200ms;
+  --t-base: 340ms;
+  --t-slow: 620ms;
+  --t-cinematic: 980ms;
+
+  /* ---- Layout ---- */
+  --shell-max: 1280px;
+  --shell-wide: 1460px;
+  --gutter: clamp(18px, 4vw, 48px);
+  --nav-h: 74px;
+
+  /* ---- Z ---- */
+  --z-bg: 0;
+  --z-content: 1;
+  --z-sticky: 50;
+  --z-nav: 100;
+  --z-dropdown: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+}
+
+/* Status color mapping used across chips, cards and the map */
+:root {
+  --status-available-fg: var(--verdant-700);
+  --status-available-bg: var(--verdant-50);
+  --status-available-bd: var(--verdant-200);
+
+  --status-accepted-fg: var(--indigo-700);
+  --status-accepted-bg: var(--indigo-50);
+  --status-accepted-bd: var(--indigo-200);
+
+  --status-transit-fg: var(--amber-700);
+  --status-transit-bg: var(--amber-50);
+  --status-transit-bd: var(--amber-200);
+
+  --status-complete-fg: #0f766e;
+  --status-complete-bg: #f0fdfa;
+  --status-complete-bd: #99f6e4;
+
+  --status-sos-fg: var(--coral-700);
+  --status-sos-bg: var(--coral-50);
+  --status-sos-bd: var(--coral-200);
+}
