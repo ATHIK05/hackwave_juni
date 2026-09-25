@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4f6fb">
+<title>Live Console — Rescue Net</title>
+<meta name="description" content="Rescue Net operations console: live rescue board, dispatch map, SOS beacons, impact reporting and partner verification.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="stylesheet" href="assets/css/pages.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='26' fill='%230b8157'/%3E%3Cpath d='M30 52l14 14 26-30' stroke='white' stroke-width='10' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<a class="skip-link" href="#console">Skip to console</a>
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<div class="aurora-field" aria-hidden="true">
+  <div class="aurora-grid"></div>
+  <div class="aurora-blob b1"></div>
+  <div class="aurora-blob b2"></div>
+  <div class="aurora-blob b3"></div>
+</div>
+
+<!-- ============================ NAV ============================ -->
+<header class="app-nav">
+  <nav class="shell shell-wide nav-inner" aria-label="Console">
+    <a class="brand" href="index.html">
+      <span class="brand-mark"><i class="fa-solid fa-leaf"></i></span>
+      <span class="brand-text">
+        <span class="brand-name">Rescue&nbsp;Net</span>
+        <span class="brand-sub">Operations console</span>
+      </span>
+    </a>
+
+    <div class="nav-links" id="nav-links">
+      <a class="nav-link" href="index.html">Overview site</a>
+      <a class="nav-link is-active" href="app.html">Console</a>
+      <a class="nav-link" href="FIREBASE.md">Firebase setup</a>
+    </div>
+
+    <div class="nav-actions">
+      <span class="fb-pill" id="fb-status"><span class="dot"></span><span id="fb-status-text">Prototype data</span></span>
+
+      <div class="segment" id="role-segment" role="tablist" aria-label="Active role">
+        <span class="segment-thumb" aria-hidden="true"></span>
+        <button class="segment-item" role="tab" aria-selected="true" data-role="donor"><i class="fa-solid fa-utensils"></i> Donor</button>
+        <button class="segment-item" role="tab" aria-selected="false" data-role="ngo"><i class="fa-solid fa-hand-holding-heart"></i> NGO</button>
+        <button class="segment-item" role="tab" aria-selected="false" data-role="courier"><i class="fa-solid fa-route"></i> Courier</button>
+        <button class="segment-item" role="tab" aria-selected="false" data-role="admin"><i class="fa-solid fa-shield-halved"></i> Admin</button>
+      </div>
+
+      <div style="position:relative">
+        <button class="icon-btn" id="notif-btn" data-popover-trigger="notif-pop" aria-expanded="false" aria-label="Notifications">
+          <i class="fa-regular fa-bell"></i>
+          <span class="badge-count hide" id="notif-badge">0</span>
+        </button>
+        <div class="popover" id="notif-pop" role="dialog" aria-label="Notifications">
+          <div class="popover-head">
+            <h4>Notifications</h4>
+            <button class="btn btn-ghost btn-sm" id="notif-read-all">Mark all read</button>
+          </div>
+          <div class="popover-body" id="notif-list"></div>
+          <div class="popover-foot"><button class="btn btn-glass btn-sm btn-block" id="notif-clear"><i class="fa-regular fa-trash-can"></i> Clear all</button></div>
+        </div>
+      </div>
+
+      <button class="btn btn-danger btn-sm" id="sos-btn"><i class="fa-solid fa-tower-broadcast"></i> SOS</button>
+
+      <a class="user-chip" id="user-chip" href="login.html">
+        <span class="avatar" id="user-avatar">GT</span>
+        <span>
+          <span class="user-name" id="user-name">Guest operator</span>
+          <span class="user-role" id="user-role">Sign in</span>
+        </span>
+      </a>
+
+      <button class="icon-btn nav-burger" aria-label="Menu" aria-expanded="false"><i class="fa-solid fa-bars"></i></button>
+    </div>
+  </nav>
+</header>
+
+<!-- ============================ SOS BANNER ============================ -->
+<div class="sos-banner" id="sos-banner" role="alert">
+  <span class="sos-pulse"></span>
+  <strong>SOS beacon active</strong>
+  <span id="sos-banner-msg">A rescue is under its critical window.</span>
+  <button class="btn btn-sm btn-glass" id="sos-banner-view">View rescue</button>
+  <button class="icon-btn" id="sos-banner-close" aria-label="Dismiss" style="background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.35);color:#fff"><i class="fa-solid fa-xmark"></i></button>
+</div>
+
+<!-- ============================ CONSOLE ============================ -->
+<main class="console" id="console">
+  <div class="shell shell-wide">
+
+    <div class="console-head">
+      <div>
+        <span class="eyebrow">Live operations</span>
+        <h1 id="console-greeting">Good evening, operator</h1>
+        <p id="console-subline">Monitoring surplus across 9 zones · seeded operational dataset</p>
+      </div>
+      <div class="row wrap">
+        <span class="chip chip-live"><span class="live-dot"></span> Realtime</span>
+        <button class="btn btn-glass btn-sm" id="reset-seed"><i class="fa-solid fa-rotate"></i> Reset demo data</button>
+        <button class="btn btn-primary btn-sm" id="quick-post"><i class="fa-solid fa-plus"></i> Post surplus</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabbar" role="tablist" aria-label="Console sections">
+      <button class="tab is-active" role="tab" data-tab="overview" aria-selected="true"><i class="fa-solid fa-gauge-high"></i> Overview</button>
+      <button class="tab" role="tab" data-tab="board" aria-selected="false"><i class="fa-solid fa-layer-group"></i> Rescue board <span class="tab-count" id="count-board">0</span></button>
+      <button class="tab" role="tab" data-tab="post" aria-selected="false"><i class="fa-solid fa-plus"></i> Post surplus</button>
+      <button class="tab" role="tab" data-tab="map" aria-selected="false"><i class="fa-solid fa-map-location-dot"></i> Dispatch map</button>
+      <button class="tab" role="tab" data-tab="impact" aria-selected="false"><i class="fa-solid fa-chart-line"></i> Impact</button>
+      <button class="tab" role="tab" data-tab="admin" aria-selected="false"><i class="fa-solid fa-shield-halved"></i> Verification <span class="tab-count" id="count-admin">0</span></button>
+    </div>
+
+    <!-- ---------------- OVERVIEW ---------------- -->
+    <section class="tab-panel is-active" data-panel="overview" role="tabpanel">
+      <div class="metric-grid" id="metric-grid" style="margin-bottom:var(--s-5)"></div>
+
+      <div class="console-grid">
+        <div class="stack">
+          <div class="panel">
+            <div class="panel-head">
+              <div><h3>Needs attention now</h3><p>Sorted by remaining safety window</p></div>
+              <button class="btn btn-ghost btn-sm" data-goto="board">Open board <i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+            <div class="panel-body">
+              <div class="card-grid" id="urgent-grid"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div><h3>Week at a glance</h3><p>Meals rescued per day across all zones</p></div>
+            </div>
+            <div class="panel-body"><div class="bar-chart" id="overview-chart"></div></div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="panel">
+            <div class="panel-head"><div><h3>Live activity</h3><p>Every action, timestamped</p></div></div>
+            <div class="panel-body"><div class="timeline" id="activity-feed"></div></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><div><h3>Courier pool</h3><p id="courier-sub">—</p></div></div>
+            <div class="panel-body flush" id="volunteer-list" style="padding:8px"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------- BOARD ---------------- -->
+    <section class="tab-panel" data-panel="board" role="tabpanel">
+      <div class="filter-bar">
+        <div class="input-with-icon">
+          <input class="input" id="f-search" type="search" placeholder="Search rescues, donors, locations…" aria-label="Search rescues">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+        <select class="select" id="f-category" aria-label="Category"><option value="all">All categories</option></select>
+        <select class="select" id="f-status" aria-label="Status">
+          <option value="all">Any status</option>
+          <option value="available">Available</option>
+          <option value="accepted">Claimed</option>
+          <option value="in_transit">In transit</option>
+          <option value="completed">Delivered</option>
+        </select>
+        <select class="select" id="f-urgency" aria-label="Urgency">
+          <option value="all">Any urgency</option>
+          <option value="sos">SOS beacons</option>
+          <option value="critical">Under 1 hour</option>
+          <option value="soon">1–4 hours</option>
+          <option value="later">4 hours +</option>
+        </select>
+        <button class="btn btn-glass btn-sm" id="f-reset"><i class="fa-solid fa-filter-circle-xmark"></i> Reset</button>
+      </div>
+
+      <div class="row-between wrap" style="margin-bottom:16px">
+        <p style="margin:0;font-size:var(--fs-sm);color:var(--ink-500)"><strong id="board-count">0</strong> rescues match your filters</p>
+        <div class="row">
+          <select class="select" id="f-sort" style="width:auto" aria-label="Sort by">
+            <option value="urgent">Most urgent first</option>
+            <option value="newest">Newest first</option>
+            <option value="largest">Largest first</option>
+          </select>
+          <button class="btn btn-glass btn-sm" id="purge-expired"><i class="fa-regular fa-trash-can"></i> Purge expired</button>
+        </div>
+      </div>
+
+      <div class="card-grid" id="board-grid"></div>
+    </section>
+
+    <!-- ---------------- POST ---------------- -->
+    <section class="tab-panel" data-panel="post" role="tabpanel">
+      <div class="console-grid">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Post surplus food</h3><p>Listings go live instantly to every verified receiver in range</p></div></div>
+          <div class="panel-body">
+            <form id="post-form" novalidate>
+              <div class="form-grid">
+                <div class="field span-2">
+                  <label class="field-label" for="p-title">Listing title <span class="req">*</span></label>
+                  <input class="input" id="p-title" placeholder="e.g. Banquet surplus — rice, curries & bread" required>
+                  <span class="field-error"><i class="fa-solid fa-circle-exclamation"></i> Give the listing a clear title.</span>
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="p-donor">Donor / organisation <span class="req">*</span></label>
+                  <input class="input" id="p-donor" placeholder="Skyline Grand Hotel" required>
+                  <span class="field-error"><i class="fa-solid fa-circle-exclamation"></i> Who is donating?</span>
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="p-category">Category</label>
+                  <select class="select" id="p-category"></select>
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="p-kg">Quantity (kg) <span class="req">*</span></label>
+                  <input class="input" id="p-kg" type="number" min="1" step="1" placeholder="85" required>
+                  <span class="field-error"><i class="fa-solid fa-circle-exclamation"></i> Enter the approximate weight.</span>
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="p-servings">Estimated servings</label>
+                  <input class="input" id="p-servings" type="number" min="1" step="1" placeholder="180">
+                  <span class="field-hint">Left blank we estimate roughly 2 servings per kilo.</span>
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="p-storage">Storage class</label>
+                  <select class="select" id="p-storage"></select>
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="p-window">Safe window (hours) <span class="req">*</span></label>
+                  <input class="input" id="p-window" type="number" min="0.5" step="0.5" value="3" required>
+                  <span class="field-hint">Hot-held food should rarely exceed 3 hours.</span>
+                </div>
+
+                <div class="field span-2">
+                  <label class="field-label" for="p-location">Pickup address <span class="req">*</span></label>
+                  <input class="input" id="p-location" placeholder="Sector 7, Cyber Hub — Loading Dock A" required>
+                  <span class="field-error"><i class="fa-solid fa-circle-exclamation"></i> Couriers need an exact pickup point.</span>
+                </div>
+
+                <div class="field span-2">
+                  <label class="field-label" for="p-photo">Photo URL <span style="font-weight:600;color:var(--ink-400)">(optional)</span></label>
+                  <input class="input" id="p-photo" type="url" placeholder="https://…">
+                  <span class="field-hint">Images are stored as links only — the platform never uses Firebase Storage.</span>
+                </div>
+
+                <div class="field span-2">
+                  <label class="field-label" for="p-notes">Handling notes</label>
+                  <textarea class="textarea" id="p-notes" placeholder="Packed in thermal trays, logged at 68°C. Dock access until 11pm."></textarea>
+                </div>
+
+                <label class="check-card span-2" id="p-sos-card">
+                  <input type="checkbox" id="p-sos">
+                  <span>
+                    <strong>Raise an SOS beacon</strong>
+                    <span>Broadcast to every verified receiver and courier in range. Use when the window is under one hour.</span>
+                  </span>
+                </label>
+              </div>
+
+              <div class="row wrap" style="margin-top:22px">
+                <button class="btn btn-primary btn-lg" type="submit"><i class="fa-solid fa-paper-plane"></i> Publish rescue</button>
+                <button class="btn btn-glass" type="button" id="p-fill"><i class="fa-solid fa-wand-magic-sparkles"></i> Fill sample</button>
+                <button class="btn btn-ghost" type="reset">Clear</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="panel">
+            <div class="panel-head"><div><h3>Live preview</h3><p>Exactly how receivers will see it</p></div></div>
+            <div class="panel-body"><div id="post-preview"></div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><h3>Posting checklist</h3></div></div>
+            <div class="panel-body stack" style="font-size:var(--fs-sm)">
+              <div class="trust-item"><i class="fa-solid fa-temperature-half"></i> Record the holding temperature before dispatch.</div>
+              <div class="trust-item"><i class="fa-solid fa-box-open"></i> Use sealed, food-grade, stackable containers.</div>
+              <div class="trust-item"><i class="fa-solid fa-triangle-exclamation"></i> Declare allergens in the handling notes.</div>
+              <div class="trust-item"><i class="fa-solid fa-clock"></i> Set the window from preparation time, not pickup time.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------- MAP ---------------- -->
+    <section class="tab-panel" data-panel="map" role="tabpanel">
+      <div class="metric-grid" id="map-metrics" style="margin-bottom:var(--s-5)"></div>
+      <div class="map-frame">
+        <div class="map-canvas" id="map"></div>
+        <div class="map-overlay-tl">
+          <span class="chip chip-live" style="background:rgba(255,255,255,.92)"><span class="live-dot"></span> Live vectors</span>
+        </div>
+        <div class="map-overlay-br">
+          <button class="btn btn-glass btn-sm" id="map-recenter"><i class="fa-solid fa-crosshairs"></i> Recentre</button>
+          <button class="btn btn-glass btn-sm" id="map-sos-focus"><i class="fa-solid fa-tower-broadcast"></i> Jump to SOS</button>
+        </div>
+        <div class="map-legend">
+          <span class="legend-key"><span class="legend-dot" style="background:var(--verdant-500)"></span> Donor surplus</span>
+          <span class="legend-key"><span class="legend-dot" style="background:var(--indigo-500)"></span> Receiver</span>
+          <span class="legend-key"><span class="legend-dot" style="background:var(--coral-500)"></span> SOS beacon</span>
+          <span class="legend-key"><span class="legend-dot" style="background:#14b8a6"></span> Completed</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------- IMPACT ---------------- -->
+    <section class="tab-panel" data-panel="impact" role="tabpanel">
+      <div class="metric-grid" id="impact-metrics" style="margin-bottom:var(--s-5)"></div>
+      <div class="console-grid">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Daily rescue volume</h3><p>Meals and kilos, rolling seven days</p></div></div>
+          <div class="panel-body"><div class="bar-chart" id="impact-chart-full"></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h3>Status mix</h3><p>Where every rescue currently sits</p></div></div>
+          <div class="panel-body">
+            <div class="donut-wrap">
+              <div class="donut" id="console-donut"></div>
+              <div class="donut-legend" id="console-legend"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:var(--s-5)">
+        <div class="panel-head"><div><h3>Partner leaderboard</h3><p>Rescues completed by organisation</p></div></div>
+        <div class="panel-body flush table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Organisation</th><th>Type</th><th>Zone</th><th>Rescues</th><th>Rating</th><th>Status</th></tr></thead>
+            <tbody id="partner-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------- ADMIN ---------------- -->
+    <section class="tab-panel" data-panel="admin" role="tabpanel">
+      <div class="panel">
+        <div class="panel-head">
+          <div><h3>Verification queue</h3><p>Licence and registration checks before an org can transact</p></div>
+          <span class="chip chip-transit" id="admin-pending-chip">0 pending</span>
+        </div>
+        <div class="panel-body flush table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Organisation</th><th>Role</th><th>Licence</th><th>Submitted</th><th>Status</th><th style="text-align:right">Decision</th></tr></thead>
+            <tbody id="verify-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="console-grid" style="margin-top:var(--s-5)">
+        <div class="panel">
+          <div class="panel-head"><div><h3>System health</h3><p>Backend, data freshness and integrations</p></div></div>
+          <div class="panel-body stack" id="system-health"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h3>Firebase connection</h3><p>Plug and play in one paste</p></div></div>
+          <div class="panel-body">
+            <p style="font-size:var(--fs-sm)">Drop your web app credentials into <code class="kbd">assets/js/core/firebase-config.js</code>, then populate Firestore:</p>
+            <pre class="mono" style="background:var(--ink-900);color:#e6f7ef;padding:16px;border-radius:var(--r-md);overflow:auto;font-size:.78rem;line-height:1.6">npm install
+npm run seed</pre>
+            <p style="font-size:var(--fs-xs);color:var(--ink-500);margin-bottom:0">Firestore only — no Firebase Storage, no paid services. Everything here runs on the Spark plan.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- ============================ OVERLAYS ============================ -->
+<div class="overlay" id="overlay"></div>
+
+<div class="modal" id="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+  <div class="modal-panel is-wide">
+    <div class="modal-head">
+      <div><h3 id="detail-title">Rescue details</h3><p style="margin:0;font-size:var(--fs-xs);color:var(--ink-500)" id="detail-sub">—</p></div>
+      <button class="icon-btn" data-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" data-modal-body id="detail-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-glass" data-close>Close</button>
+      <button class="btn btn-primary" id="detail-action"><i class="fa-solid fa-bolt"></i> Claim rescue</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="sos-modal" role="dialog" aria-modal="true" aria-labelledby="sos-title">
+  <div class="modal-panel">
+    <div class="modal-head">
+      <div><h3 id="sos-title">Raise an SOS beacon</h3><p style="margin:0;font-size:var(--fs-xs);color:var(--ink-500)">Broadcast to every verified receiver and courier in range</p></div>
+      <button class="icon-btn" data-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <form id="sos-form" class="form-grid" novalidate>
+        <div class="field span-2">
+          <label class="field-label" for="s-source">Source organisation <span class="req">*</span></label>
+          <input class="input" id="s-source" placeholder="CyberBake Central Kitchen" required>
+        </div>
+        <div class="field span-2">
+          <label class="field-label" for="s-food">What needs rescuing <span class="req">*</span></label>
+          <input class="input" id="s-food" placeholder="150 sandwich & pastry trays" required>
+        </div>
+        <div class="field">
+          <label class="field-label" for="s-location">Pickup point <span class="req">*</span></label>
+          <input class="input" id="s-location" placeholder="Block 4, Tech Corridor — Gate 2" required>
+        </div>
+        <div class="field">
+          <label class="field-label" for="s-minutes">Minutes remaining <span class="req">*</span></label>
+          <input class="input" id="s-minutes" type="number" min="5" max="180" value="45" required>
+        </div>
+      </form>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-glass" data-close>Cancel</button>
+      <button class="btn btn-danger" id="sos-submit"><i class="fa-solid fa-tower-broadcast"></i> Broadcast beacon</button>
+    </div>
+  </div>
+</div>
+
+<!-- Voice assistant -->
+<button class="fab-voice" id="voice-fab" aria-label="Voice assistant"><i class="fa-solid fa-microphone"></i></button>
+<div class="voice-sheet" id="voice-sheet" role="dialog" aria-label="Voice assistant">
+  <div class="row-between">
+    <strong style="font-size:var(--fs-sm)">Voice command</strong>
+    <button class="icon-btn" id="voice-close" aria-label="Close" style="width:32px;height:32px"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="wave" id="voice-wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+  <p id="voice-status" style="font-size:var(--fs-xs);text-align:center;color:var(--ink-500);margin:0 0 12px">Tap the mic and say “show SOS rescues”.</p>
+  <div class="row wrap" style="gap:6px;justify-content:center">
+    <button class="btn btn-glass btn-sm" data-voice="board">Open board</button>
+    <button class="btn btn-glass btn-sm" data-voice="map">Dispatch map</button>
+    <button class="btn btn-glass btn-sm" data-voice="sos">Show SOS</button>
+    <button class="btn btn-glass btn-sm" data-voice="impact">Impact</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="module" src="assets/js/pages/console.js"></script>
+</body>
+</html>

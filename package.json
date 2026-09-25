@@ -1,0 +1,25 @@
+{
+  "name": "rescue-net",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Rescue Net — live surplus food rescue console. Static, dependency-free frontend with plug-and-play Cloud Firestore.",
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes serve . -l 5173",
+    "start": "npm run dev",
+    "seed": "node scripts/seed-firestore.mjs",
+    "seed:reset": "node scripts/seed-firestore.mjs -- --reset",
+    "seed:dry": "node scripts/seed-firestore.mjs -- --dry",
+    "firebase:rules": "firebase deploy --only firestore:rules,firestore:indexes",
+    "firebase:deploy": "firebase deploy --only hosting"
+  },
+  "dependencies": {
+    "firebase": "^10.12.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "playwright": "1.47"
+  }
+}
