@@ -39,6 +39,10 @@
     box-sizing: border-box;
 }
 
+.hidden {
+    display: none !important;
+}
+
 body {
     background: 
         radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.12), transparent 45%),
@@ -845,6 +849,49 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
+.donation-card-photo {
+    height: 180px;
+    margin: -20px -20px 18px;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+    background: rgba(5, 11, 24, 0.8);
+}
+
+.donation-card-photo img,
+.donation-card-photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.donation-card-photo img {
+    object-fit: cover;
+}
+
+.donation-card-photo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    background:
+        linear-gradient(135deg, rgba(56, 189, 248, 0.16), rgba(16, 185, 129, 0.08)),
+        repeating-linear-gradient(135deg, transparent 0 14px, rgba(255, 255, 255, 0.035) 14px 15px);
+    color: var(--cyan);
+}
+
+.donation-card-photo-placeholder i {
+    font-size: 30px;
+    text-shadow: 0 0 14px var(--cyan-glow);
+}
+
+.donation-card-photo-placeholder span {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
 .donation-card:hover {
     border-color: var(--cyan);
     box-shadow: 0 14px 35px rgba(56, 189, 248, 0.2), 0 0 1px var(--cyan);
@@ -1020,6 +1067,77 @@ body {
     color: var(--cyan);
 }
 
+.food-photo-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px dashed var(--border-bright);
+    border-radius: 8px;
+    background: rgba(56, 189, 248, 0.06);
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    cursor: pointer;
+}
+
+.food-photo-input::file-selector-button {
+    margin-right: 12px;
+    padding: 8px 12px;
+    border: 1px solid var(--cyan);
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.14);
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.food-photo-help {
+    color: var(--text-dim);
+    font-size: 12px;
+}
+
+.food-photo-error {
+    min-height: 18px;
+    color: var(--red);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.food-photo-preview {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px;
+    border: 1px solid rgba(16, 185, 129, 0.45);
+    border-radius: 8px;
+    background: rgba(16, 185, 129, 0.08);
+}
+
+.food-photo-preview img {
+    width: 96px;
+    height: 72px;
+    flex: 0 0 auto;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.food-photo-preview-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+    width: 100%;
+}
+
+.food-photo-name {
+    overflow: hidden;
+    color: var(--text-primary);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .form-actions {
     display: flex;
     justify-content: flex-end;
@@ -1030,6 +1148,19 @@ body {
 .large-btn {
     padding: 12px 28px;
     font-size: 14px;
+}
+
+@media (max-width: 480px) {
+    .food-photo-preview,
+    .food-photo-preview-meta {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .food-photo-preview img {
+        width: 100%;
+        height: 150px;
+    }
 }
 
 .checkbox-group {

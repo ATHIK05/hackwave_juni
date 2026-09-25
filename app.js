@@ -15,6 +15,7 @@ class RescueNetApp {
         this.map = null;
         this.markersGroup = null;
         this.audioCtx = null;
+        this.selectedFoodPhoto = null;
 
         // Initialize components
         this.initAudioContext();
@@ -578,6 +579,11 @@ class RescueNetApp {
 
         return `
             <div class="donation-card ${item.isSos ? 'sos-card' : ''}">
+                <div class="donation-card-photo">
+                    ${item.foodPhoto
+                        ? `<img src="${item.foodPhoto}" alt="Current food photo for ${item.title}" loading="lazy">`
+                        : `<div class="donation-card-photo-placeholder"><i class="fa-solid fa-utensils"></i><span>FOOD PHOTO PENDING</span></div>`}
+                </div>
                 <div>
                     <div class="card-header-badge">
                         <span class="cat-badge">${item.category}</span>
@@ -739,9 +745,29 @@ class RescueNetApp {
         // New Donation Form
         const postForm = document.getElementById('post-donation-form');
         if (postForm) {
+            const photoInput = document.getElementById('post-food-photo');
+            const removePhotoBtn = document.getElementById('remove-food-photo-btn');
+
+            if (photoInput) {
+                photoInput.addEventListener('change', (e) => {
+                    this.handleFoodPhotoSelection(e.target.files[0]);
+                });
+            }
+
+            if (removePhotoBtn) {
+                removePhotoBtn.addEventListener('click', () => {
+                    this.clearFoodPhotoUpload();
+                });
+            }
+
             postForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                this.createNewDonation();
+                if (this.selectedFoodPhoto) {
+                    this.createNewDonation();
+                } else {
+                    this.showFoodPhotoError('A current food photo is required before transmitting this listing.');
+                    photoInput?.reportValidity();
+                }
             });
         }
 
@@ -755,6 +781,62 @@ class RescueNetApp {
         }
     }
 
+    handleFoodPhotoSelection(file) {
+        if (!file) return;
+
+        const allowedExtensions = ['jpg', 'jpeg', 'png'];
+        const extension = file.name.split('.').pop().toLowerCase();
+        const allowedMimeTypes = ['image/jpeg', 'image/png'];
+
+        if (!allowedExtensions.includes(extension) || (file.type && !allowedMimeTypes.includes(file.type))) {
+            this.clearFoodPhotoUpload();
+            this.showFoodPhotoError('Please choose a JPG, JPEG, or PNG image.');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            this.clearFoodPhotoUpload();
+            this.showFoodPhotoError('The food photo must be 5 MB or smaller.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            this.selectedFoodPhoto = {
+                name: file.name,
+                dataUrl: reader.result
+            };
+
+            document.getElementById('food-photo-preview-image').src = reader.result;
+            document.getElementById('food-photo-name').textContent = file.name;
+            document.getElementById('food-photo-preview').classList.remove('hidden');
+            this.showFoodPhotoError('');
+        };
+        reader.onerror = () => {
+            this.clearFoodPhotoUpload();
+            this.showFoodPhotoError('The selected photo could not be read. Please try another image.');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    clearFoodPhotoUpload() {
+        this.selectedFoodPhoto = null;
+        const photoInput = document.getElementById('post-food-photo');
+        const preview = document.getElementById('food-photo-preview');
+        const previewImage = document.getElementById('food-photo-preview-image');
+        const photoName = document.getElementById('food-photo-name');
+
+        if (photoInput) photoInput.value = '';
+        if (preview) preview.classList.add('hidden');
+        if (previewImage) previewImage.removeAttribute('src');
+        if (photoName) photoName.textContent = '';
+    }
+
+    showFoodPhotoError(message) {
+        const error = document.getElementById('food-photo-error');
+        if (error) error.textContent = message;
+    }
+
     createNewDonation() {
         const title = document.getElementById('post-title').value;
         const category = document.getElementById('post-category').value;
@@ -765,6 +847,7 @@ class RescueNetApp {
         const storage = document.getElementById('post-storage').value;
         const notes = document.getElementById('post-notes').value;
         const isSos = document.getElementById('post-is-sos').checked;
+        const foodPhoto = this.selectedFoodPhoto;
 
         // Generate near central coordinates with small random offset
         const lat = 28.6139 + (Math.random() - 0.5) * 0.05;
@@ -785,6 +868,8 @@ class RescueNetApp {
             expiryTimestamp: Date.now() + (expiryHours * 60 * 60 * 1000),
             storage,
             notes,
+            foodPhoto: foodPhoto.dataUrl,
+            foodPhotoName: foodPhoto.name,
             status: 'Available',
             claimedBy: null,
             claimedByRole: null,
@@ -800,6 +885,7 @@ class RescueNetApp {
         this.updateStats();
 
         document.getElementById('post-donation-form').reset();
+        this.clearFoodPhotoUpload();
         this.switchTab('tab-browse');
 
         if (isSos) {

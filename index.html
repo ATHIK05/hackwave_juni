@@ -309,6 +309,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             <input type="text" id="post-location" required class="cyber-input" placeholder="e.g. Sector 4, Tech Park, Block B">
                         </div>
 
+                        <div class="form-group col-span-2">
+                            <label for="post-food-photo"><i class="fa-solid fa-camera"></i> Current Food Photo *</label>
+                            <input type="file" id="post-food-photo" class="food-photo-input" accept="image/jpeg,image/png,.jpg,.jpeg,.png" required>
+                            <div class="food-photo-help">Upload a clear photo of the actual food. JPG, JPEG or PNG, maximum 5 MB.</div>
+                            <div id="food-photo-error" class="food-photo-error" role="alert" aria-live="polite"></div>
+                            <div id="food-photo-preview" class="food-photo-preview hidden">
+                                <img id="food-photo-preview-image" alt="Preview of the selected food">
+                                <div class="food-photo-preview-meta">
+                                    <span id="food-photo-name" class="food-photo-name"></span>
+                                    <button type="button" id="remove-food-photo-btn" class="cyber-btn secondary-sm">
+                                        <i class="fa-solid fa-rotate"></i> CHANGE / REMOVE PHOTO
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label for="post-expiry-hours"><i class="fa-solid fa-clock"></i> Expiry Time Window *</label>
                             <select id="post-expiry-hours" class="cyber-select">
