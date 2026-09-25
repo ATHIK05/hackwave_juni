@@ -121,37 +121,21 @@ class RescueNetApp {
             height = canvas.height = window.innerHeight;
         });
 
-        // Generate glowing nodes
-        const particles = Array.from({ length: 40 }, () => ({
+        // Generate elegant ambient glowing nodes
+        const particles = Array.from({ length: 35 }, () => ({
             x: Math.random() * width,
             y: Math.random() * height,
-            vx: (Math.random() - 0.5) * 0.4,
-            vy: (Math.random() - 0.5) * 0.4,
-            radius: Math.random() * 2 + 1,
-            alpha: Math.random() * 0.5 + 0.2
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: (Math.random() - 0.5) * 0.3,
+            radius: Math.random() * 2 + 1.5,
+            color: Math.random() > 0.5 ? '16, 185, 129' : '56, 189, 248',
+            alpha: Math.random() * 0.4 + 0.15
         }));
 
         const animate = () => {
             ctx.clearRect(0, 0, width, height);
 
-            // Draw faint Cyber Grid
-            ctx.strokeStyle = 'rgba(0, 243, 255, 0.03)';
-            ctx.lineWidth = 1;
-            const gridSize = 60;
-            for (let x = 0; x < width; x += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, height);
-                ctx.stroke();
-            }
-            for (let y = 0; y < height; y += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(width, y);
-                ctx.stroke();
-            }
-
-            // Draw Floating Particles & Constellations
+            // Draw Floating Soft Ambient Particles & Subtle Connections
             particles.forEach((p, idx) => {
                 p.x += p.vx;
                 p.y += p.vy;
@@ -163,18 +147,18 @@ class RescueNetApp {
 
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(0, 243, 255, ${p.alpha})`;
+                ctx.fillStyle = `rgba(${p.color}, ${p.alpha})`;
                 ctx.fill();
 
-                // Connect nearby particles
+                // Soft subtle constellation lines
                 for (let j = idx + 1; j < particles.length; j++) {
                     const p2 = particles[j];
                     const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-                    if (dist < 130) {
+                    if (dist < 140) {
                         ctx.beginPath();
                         ctx.moveTo(p.x, p.y);
                         ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = `rgba(0, 243, 255, ${0.15 * (1 - dist / 130)})`;
+                        ctx.strokeStyle = `rgba(${p.color}, ${0.1 * (1 - dist / 140)})`;
                         ctx.stroke();
                     }
                 }
@@ -216,8 +200,8 @@ class RescueNetApp {
         if (soundBtn) {
             soundBtn.addEventListener('click', () => {
                 this.soundEnabled = !this.soundEnabled;
-                soundBtn.innerHTML = this.soundEnabled 
-                    ? `<i class="fa-solid fa-volume-high"></i>` 
+                soundBtn.innerHTML = this.soundEnabled
+                    ? `<i class="fa-solid fa-volume-high"></i>`
                     : `<i class="fa-solid fa-volume-xmark" style="color:var(--text-muted)"></i>`;
                 this.showToast(`Audio FX: ${this.soundEnabled ? 'ENABLED' : 'MUTED'}`, 'system');
             });
@@ -438,7 +422,7 @@ class RescueNetApp {
             });
 
             const marker = L.marker([item.lat, item.lng], { icon: customIcon });
-            
+
             marker.bindPopup(`
                 <div style="font-family:'Rajdhani',sans-serif; color:#050811; padding:4px;">
                     <strong style="color:${item.isSos ? '#ff0055' : '#00a3cc'}; font-size:14px;">${item.title}</strong><br/>
@@ -509,12 +493,12 @@ class RescueNetApp {
 
         const filtered = this.donations.filter(item => {
             const matchesSearch = item.title.toLowerCase().includes(searchVal) ||
-                                  item.donor.toLowerCase().includes(searchVal) ||
-                                  item.location.toLowerCase().includes(searchVal);
+                item.donor.toLowerCase().includes(searchVal) ||
+                item.location.toLowerCase().includes(searchVal);
 
             const matchesCat = catVal === 'all' || item.category === catVal;
             const matchesStatus = statusVal === 'all' || item.status === statusVal;
-            
+
             let matchesUrgency = true;
             const hoursLeft = (item.expiryTimestamp - Date.now()) / (1000 * 60 * 60);
             if (urgencyVal === 'sos') matchesUrgency = item.isSos;
@@ -895,7 +879,7 @@ class RescueNetApp {
                     this.donations = INITIAL_DONATIONS;
                     this.verifications = INITIAL_VERIFICATIONS;
                     this.notifications = INITIAL_NOTIFICATIONS;
-                    
+
                     this.renderDonationGrid();
                     this.renderMapMarkers();
                     this.renderAdminTable();
